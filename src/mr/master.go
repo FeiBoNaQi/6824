@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/rpc"
 	"os"
+	"sync"
 	"time"
 )
 
@@ -14,6 +15,7 @@ type Master struct {
 	state     []int8
 	location  []string
 	startTime []time.Time
+	mutex     sync.Mutex
 }
 
 // Your code here -- RPC handlers for the worker to call.
