@@ -39,10 +39,10 @@ func Worker(mapf func(string, string) []KeyValue,
 
 	// uncomment to send the Example RPC to the master.
 	// CallExample()
+	args := CommunicateArgs{
+		TaskNumber: -1,
+	}
 	for {
-		args := CommunicateArgs{
-			TaskNumber: -1,
-		}
 		reply := CommunicateReply{}
 		call("Master.Communicate", &args, &reply)
 		fmt.Printf("reply.TaskNumber %v\n", reply.TaskNumber)
@@ -86,7 +86,8 @@ func Worker(mapf func(string, string) []KeyValue,
 			for i := 0; i < reply.NReduce; i++ {
 				intermediateFile[i].Close()
 			}
-			return
+			args.TaskNumber = reply.TaskNumber
+			args.Location = "mr-" + fmt.Sprintf("%v", reply.TaskNumber) // useless right now
 		case reduceTask:
 		case exitTask:
 			return
