@@ -21,7 +21,8 @@ type ExampleArgs struct {
 }
 
 type CommunicateArgs struct {
-	X int
+	TaskNumber int
+	Location   string
 }
 
 type ExampleReply struct {
@@ -29,7 +30,9 @@ type ExampleReply struct {
 }
 
 type CommunicateReply struct {
-	Y int
+	TaskNumber int
+	Location   string
+	Task       int
 }
 
 // Add your RPC definitions here.

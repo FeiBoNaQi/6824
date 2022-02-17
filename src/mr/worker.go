@@ -34,8 +34,17 @@ func Worker(mapf func(string, string) []KeyValue,
 	// Your worker implementation here.
 
 	// uncomment to send the Example RPC to the master.
-	CallExample()
-
+	// CallExample()
+	for {
+		args := CommunicateArgs{
+			TaskNumber: -1,
+		}
+		reply := CommunicateReply{}
+		call("Master.Communicate", &args, &reply)
+		fmt.Printf("reply.TaskNumber %v\n", reply.TaskNumber)
+		fmt.Printf("reply.Location %v\n", reply.Location)
+		fmt.Printf("reply.Task %v\n", reply.Task)
+	}
 }
 
 //
@@ -43,23 +52,23 @@ func Worker(mapf func(string, string) []KeyValue,
 //
 // the RPC argument and reply types are defined in rpc.go.
 //
-func CallExample() {
+// func CallExample() {
 
-	// declare an argument structure.
-	args := CommunicateArgs{}
+// 	// declare an argument structure.
+// 	args := CommunicateArgs{}
 
-	// fill in the argument(s).
-	args.X = 99
+// 	// fill in the argument(s).
+// 	args.X = 99
 
-	// declare a reply structure.
-	reply := CommunicateReply{}
+// 	// declare a reply structure.
+// 	reply := CommunicateReply{}
 
-	// send the RPC request, wait for the reply.
-	call("Master.Communicate", &args, &reply)
+// 	// send the RPC request, wait for the reply.
+// 	call("Master.Communicate", &args, &reply)
 
-	// reply.Y should be 100.
-	fmt.Printf("reply.Y %v\n", reply.Y)
-}
+// 	// reply.Y should be 100.
+// 	fmt.Printf("reply.Y %v\n", reply.Y)
+// }
 
 //
 // send an RPC request to the master, wait for the response.

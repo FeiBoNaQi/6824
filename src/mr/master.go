@@ -31,7 +31,9 @@ func (m *Master) Example(args *ExampleArgs, reply *ExampleReply) error {
 }
 
 func (m *Master) Communicate(args *CommunicateArgs, reply *CommunicateReply) error {
-	reply.Y = args.X + 1
+	reply.TaskNumber = 0
+	reply.Location = "test location"
+	reply.Task = mapTask
 	return nil
 }
 
@@ -86,4 +88,9 @@ const (
 
 	// timeout period seconds
 	timeSlot = 10
+
+	// map and reduce function definitions
+	mapTask    = 0
+	reduceTask = 1
+	exitTask   = 2
 )
