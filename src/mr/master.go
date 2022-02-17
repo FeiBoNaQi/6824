@@ -6,11 +6,14 @@ import (
 	"net/http"
 	"net/rpc"
 	"os"
+	"time"
 )
 
 type Master struct {
 	// Your definitions here.
-
+	state     []int8
+	location  []string
+	startTime []time.Time
 }
 
 // Your code here -- RPC handlers for the worker to call.
@@ -21,6 +24,11 @@ type Master struct {
 // the RPC argument and reply types are defined in rpc.go.
 //
 func (m *Master) Example(args *ExampleArgs, reply *ExampleReply) error {
+	reply.Y = args.X + 1
+	return nil
+}
+
+func (m *Master) Communicate(args *CommunicateArgs, reply *CommunicateReply) error {
 	reply.Y = args.X + 1
 	return nil
 }
@@ -66,3 +74,14 @@ func MakeMaster(files []string, nReduce int) *Master {
 	m.server()
 	return &m
 }
+
+const (
+	// const represent task states
+	idle       = 0
+	inProgress = 1
+	completed  = 2
+	timeout    = 3
+
+	// timeout period seconds
+	timeSlot = 10
+)

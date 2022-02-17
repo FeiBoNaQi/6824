@@ -20,7 +20,15 @@ type ExampleArgs struct {
 	X int
 }
 
+type CommunicateArgs struct {
+	X int
+}
+
 type ExampleReply struct {
+	Y int
+}
+
+type CommunicateReply struct {
 	Y int
 }
 
