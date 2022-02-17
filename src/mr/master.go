@@ -15,6 +15,7 @@ type Master struct {
 	state     []int8
 	location  []string
 	startTime []time.Time
+	NReduce   int
 	mutex     sync.Mutex
 }
 
@@ -32,8 +33,9 @@ func (m *Master) Example(args *ExampleArgs, reply *ExampleReply) error {
 
 func (m *Master) Communicate(args *CommunicateArgs, reply *CommunicateReply) error {
 	reply.TaskNumber = 0
-	reply.Location = "test location"
+	reply.Location = os.Args[1]
 	reply.Task = mapTask
+	reply.NReduce = m.NReduce
 	return nil
 }
 
@@ -72,6 +74,7 @@ func (m *Master) Done() bool {
 //
 func MakeMaster(files []string, nReduce int) *Master {
 	m := Master{}
+	m.NReduce = nReduce
 
 	// Your code here.
 
@@ -90,7 +93,8 @@ const (
 	timeSlot = 10
 
 	// map and reduce function definitions
-	mapTask    = 0
-	reduceTask = 1
-	exitTask   = 2
+	idleTask   = 0
+	mapTask    = 1
+	reduceTask = 2
+	exitTask   = 3
 )
