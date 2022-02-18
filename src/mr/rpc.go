@@ -34,6 +34,7 @@ type CommunicateReply struct {
 	Location   string
 	Task       int
 	NReduce    int
+	NMap       int
 }
 
 // Add your RPC definitions here.

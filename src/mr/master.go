@@ -17,6 +17,7 @@ type Master struct {
 	location    []string
 	startTime   []time.Time
 	NReduce     int
+	NMap        int
 	masterState int8
 	mutex       sync.Mutex
 }
@@ -93,6 +94,7 @@ func (m *Master) Communicate(args *CommunicateArgs, reply *CommunicateReply) err
 				reply.Location = fmt.Sprintf("%v", i-len(m.state)+m.NReduce)
 				reply.Task = reduceTask
 				reply.NReduce = m.NReduce
+				reply.NMap = m.NMap
 				m.startTime[i] = time.Now()
 				m.state[i] = inProgress
 				return nil
@@ -114,12 +116,13 @@ func (m *Master) Communicate(args *CommunicateArgs, reply *CommunicateReply) err
 			reply.Location = fmt.Sprintf("%v", timeOutTask-len(m.state)+m.NReduce)
 			reply.Task = reduceTask
 			reply.NReduce = m.NReduce
+			reply.NMap = m.NMap
 			m.startTime[timeOutTask] = time.Now()
 			m.state[timeOutTask] = inProgress
 			return nil
 		}
 		// if no task timeout and still some task is running, reply with idle task
-		if taskCompleted != len(m.state)-m.NReduce {
+		if taskCompleted != m.NReduce {
 			reply.Task = idleTask
 			return nil
 		}
@@ -156,7 +159,10 @@ func (m *Master) Done() bool {
 	ret := false
 
 	// Your code here.
-
+	if m.masterState == exitTask {
+		ret = true
+		time.Sleep(time.Second)
+	}
 	return ret
 }
 
@@ -168,6 +174,7 @@ func (m *Master) Done() bool {
 func MakeMaster(files []string, nReduce int) *Master {
 	m := Master{}
 	m.NReduce = nReduce
+	m.NMap = len(os.Args) - 1
 	m.state = make([]int8, nReduce+len(os.Args)-1)
 	m.location = make([]string, nReduce+len(os.Args)-1)
 	m.startTime = make([]time.Time, nReduce+len(os.Args)-1)

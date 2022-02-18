@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/rpc"
 	"os"
+	"sort"
 	"time"
 )
 
@@ -99,11 +100,61 @@ func Worker(mapf func(string, string) []KeyValue,
 			args.TaskNumber = reply.TaskNumber
 			args.Location = "mr-" + fmt.Sprintf("%v", reply.TaskNumber) // useless right now
 		case reduceTask:
-			time.Sleep(time.Second)
+			// read in the intermediate file
+			var kva []KeyValue
+			for i := 0; i < reply.NMap; i++ {
+				filename := "mr-" + fmt.Sprintf("%v", i) + "-" + reply.Location
+				file, err := os.Open(filename)
+				if err != nil {
+					log.Fatalf("reduce task cannot open %v", filename)
+				}
+				dec := json.NewDecoder(file)
+				for {
+					var kv KeyValue
+					if err := dec.Decode(&kv); err != nil {
+						break
+					}
+					kva = append(kva, kv)
+				}
+			}
+
+			// sort the intermediate key value pair
+			sort.Sort(ByKey(kva))
+
+			oname := "mr-out-" + reply.Location
+			ofile, err := ioutil.TempFile(".", oname)
+			if err != nil {
+				log.Fatalf("cannot create %v", oname)
+			}
+
+			//
+			// call Reduce on each distinct key in kva[],
+			// and print the result to mr-out-X.
+			//
+			i := 0
+			for i < len(kva) {
+				j := i + 1
+				for j < len(kva) && kva[j].Key == kva[i].Key {
+					j++
+				}
+				values := []string{}
+				for k := i; k < j; k++ {
+					values = append(values, kva[k].Value)
+				}
+				output := reducef(kva[i].Key, values)
+
+				// this is the correct format for each line of Reduce output.
+				fmt.Fprintf(ofile, "%v %v\n", kva[i].Key, output)
+
+				i = j
+			}
+			os.Rename(ofile.Name(), oname)
+			ofile.Close()
+			args.TaskNumber = reply.TaskNumber
+			args.Location = oname
 		case exitTask:
 			return
 		}
-
 	}
 }
 
