@@ -54,10 +54,10 @@ func Worker(mapf func(string, string) []KeyValue,
 	for {
 		reply := CommunicateReply{}
 		call("Master.Communicate", &args, &reply)
-		fmt.Printf("reply.TaskNumber %v\n", reply.TaskNumber)
-		fmt.Printf("reply.Location %v\n", reply.Location)
-		fmt.Printf("reply.Task %v\n", reply.Task)
-		fmt.Printf("reply.NReduce %v\n", reply.NReduce)
+		// fmt.Printf("reply.TaskNumber %v\n", reply.TaskNumber)
+		// fmt.Printf("reply.Location %v\n", reply.Location)
+		// fmt.Printf("reply.Task %v\n", reply.Task)
+		// fmt.Printf("reply.NReduce %v\n", reply.NReduce)
 
 		switch reply.Task {
 		case idleTask:
