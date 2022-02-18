@@ -29,6 +29,14 @@ func ihash(key string) int {
 	return int(h.Sum32() & 0x7fffffff)
 }
 
+// for sorting by key.
+type ByKey []KeyValue
+
+// for sorting by key.
+func (a ByKey) Len() int           { return len(a) }
+func (a ByKey) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a ByKey) Less(i, j int) bool { return a[i].Key < a[j].Key }
+
 //
 // main/mrworker.go calls this function.
 //
@@ -89,6 +97,7 @@ func Worker(mapf func(string, string) []KeyValue,
 			args.TaskNumber = reply.TaskNumber
 			args.Location = "mr-" + fmt.Sprintf("%v", reply.TaskNumber) // useless right now
 		case reduceTask:
+			time.Sleep(time.Second)
 		case exitTask:
 			return
 		}
