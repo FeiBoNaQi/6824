@@ -57,7 +57,7 @@ func (m *Master) Communicate(args *CommunicateArgs, reply *CommunicateReply) err
 			} else if m.state[i] == completed {
 				taskCompleted++
 			} else if m.state[i] == inProgress {
-				elapsed := time.Now().Sub(m.startTime[i])
+				elapsed := time.Since(m.startTime[i])
 				if elapsed > timeSlot*000000000 {
 					m.state[i] = timeout
 					timeOutTask = i
@@ -87,7 +87,7 @@ func (m *Master) Communicate(args *CommunicateArgs, reply *CommunicateReply) err
 	// master in reduce state
 	if m.masterState == reduceTask {
 		taskCompleted = 0
-		for i := len(m.state) - m.NReduce; i < len(m.state)-m.NReduce; i++ {
+		for i := len(m.state) - m.NReduce; i < len(m.state); i++ {
 			if m.state[i] == idle {
 				reply.TaskNumber = i
 				reply.Location = fmt.Sprintf("%v", i-len(m.state)+m.NReduce)
@@ -99,7 +99,7 @@ func (m *Master) Communicate(args *CommunicateArgs, reply *CommunicateReply) err
 			} else if m.state[i] == completed {
 				taskCompleted++
 			} else if m.state[i] == inProgress {
-				elapsed := time.Now().Sub(m.startTime[i])
+				elapsed := time.Since(m.startTime[i])
 				if elapsed > timeSlot*000000000 {
 					m.state[i] = timeout
 					timeOutTask = i
@@ -107,23 +107,24 @@ func (m *Master) Communicate(args *CommunicateArgs, reply *CommunicateReply) err
 			} else if m.state[i] == timeout {
 				timeOutTask = i
 			}
-			// if no task is idle, run the timeout task
-			if timeOutTask != -1 {
-				reply.TaskNumber = timeOutTask
-				reply.Location = fmt.Sprintf("%v", timeOutTask-len(m.state)+m.NReduce)
-				reply.Task = reduceTask
-				reply.NReduce = m.NReduce
-				m.startTime[timeOutTask] = time.Now()
-				m.state[timeOutTask] = inProgress
-				return nil
-			}
-			// if no task timeout and still some task is running, reply with idle task
-			if taskCompleted != len(m.state)-m.NReduce {
-				reply.Task = idleTask
-				return nil
-			}
-			m.masterState = exitTask
 		}
+		// if no task is idle, run the timeout task
+		if timeOutTask != -1 {
+			reply.TaskNumber = timeOutTask
+			reply.Location = fmt.Sprintf("%v", timeOutTask-len(m.state)+m.NReduce)
+			reply.Task = reduceTask
+			reply.NReduce = m.NReduce
+			m.startTime[timeOutTask] = time.Now()
+			m.state[timeOutTask] = inProgress
+			return nil
+		}
+		// if no task timeout and still some task is running, reply with idle task
+		if taskCompleted != len(m.state)-m.NReduce {
+			reply.Task = idleTask
+			return nil
+		}
+		m.masterState = exitTask
+
 	}
 	if m.masterState == exitTask {
 		reply.Task = exitTask
