@@ -76,7 +76,7 @@ func Worker(mapf func(string, string) []KeyValue,
 			intermediateFile := make([]*os.File, reply.NReduce)
 			for i := 0; i < reply.NReduce; i++ {
 				filename := "mr-" + fmt.Sprintf("%v", reply.TaskNumber) + "-" + fmt.Sprintf("%v", i)
-				intermediateFile[i], err = os.Create(filename)
+				intermediateFile[i], err = ioutil.TempFile(".", filename)
 				if err != nil {
 					log.Fatalf("cannot create %v", filename)
 				}
@@ -92,6 +92,8 @@ func Worker(mapf func(string, string) []KeyValue,
 			}
 
 			for i := 0; i < reply.NReduce; i++ {
+				filename := "mr-" + fmt.Sprintf("%v", reply.TaskNumber) + "-" + fmt.Sprintf("%v", i)
+				os.Rename(intermediateFile[i].Name(), filename)
 				intermediateFile[i].Close()
 			}
 			args.TaskNumber = reply.TaskNumber
